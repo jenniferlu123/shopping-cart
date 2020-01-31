@@ -29,7 +29,6 @@ products = [
 # pprint(products)
 
 
-
 print("------------------------------------")
 print("Healthy Foods Grocery")
 print("www.healthyfoodsgrocery.com")
@@ -38,4 +37,14 @@ print("------------------------------------")
 import datetime
 purchase_time = datetime.datetime.now()
 print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
+print("------------------------------------")
 
+while True:
+    cashier_input = input("Please input a product identifier: ")
+    if cashier_input == "DONE":
+        break
+    else:
+
+        matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
+        matching_product = matching_products[0]
+        print ("Selected products: " + matching_product["name"] + " " + str(matching_product["price"]))
