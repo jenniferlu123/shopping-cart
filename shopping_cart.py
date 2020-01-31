@@ -41,16 +41,22 @@ print("------------------------------------")
 
 
 total_price = 0
+selected_items = []
 
 while True:
     cashier_input = input("Please input a product identifier: ")
     if cashier_input == "DONE":
         break
     else:
-        matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
-        matching_product = matching_products[0]
-        total_price = total_price + matching_product["price"]
-        print ("Selected products: " + matching_product["name"] + " " + str(matching_product["price"]))
+        selected_items.append(cashier_input)
+ 
+#print(selected_items)
+
+for cashier_input in selected_items: 
+    matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
+    matching_product = matching_products[0]
+    total_price = total_price + matching_product["price"]
+    print ("Selected products: " + matching_product["name"] + " " + str(matching_product["price"]))
 
 print("Total price: " + str(total_price))
 
