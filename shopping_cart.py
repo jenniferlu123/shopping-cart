@@ -29,6 +29,7 @@ products = [
 # pprint(products)
 
 
+
 print("------------------------------------")
 print("Healthy Foods Grocery")
 print("www.healthyfoodsgrocery.com")
@@ -37,3 +38,4 @@ print("------------------------------------")
 import datetime
 purchase_time = datetime.datetime.now()
 print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
+
