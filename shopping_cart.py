@@ -43,15 +43,15 @@ while True:
  
 #print(selected_items)
 
-print("---------------------------------------------------")
+print("-----------------------------------------------------------")
 print("Healthy Foods Grocery")
 print("www.healthyfoodsgrocery.com")
-print("---------------------------------------------------")
+print("-----------------------------------------------------------")
 
 import datetime
 purchase_time = datetime.datetime.now()
 print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
-print("---------------------------------------------------")
+print("-----------------------------------------------------------")
 
 
 print("Selected products: ")
@@ -62,8 +62,24 @@ for cashier_input in selected_items:
     price_usd = "${0:.2f}".format(matching_product["price"])
     print("... " + matching_product["name"] + " (" + str(price_usd) + ")")
 
-print("---------------------------------------------------")
+print("-----------------------------------------------------------")
 print("Subtotal: " + "$" + str(total_price))
+
+tax = total_price*0.0875
+tax_usd = "${0:.2f}".format(tax)
+print("Tax: " + str(tax_usd))
+
+total_amount = total_price + tax
+total_amount_usd = "${0:.2f}".format(total_amount)
+print("Total: " + str(total_amount_usd))
+
+print("-----------------------------------------------------------")
+print("Thanks for shopping with us. Hope to see you again soon")
+print("-----------------------------------------------------------")
+
+
+
+
 
         #product_names = [p["name"] for p in products]
         #x = [hello" for p in products]
