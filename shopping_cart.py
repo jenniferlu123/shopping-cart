@@ -29,15 +29,6 @@ products = [
 # pprint(products)
 
 
-print("------------------------------------")
-print("Healthy Foods Grocery")
-print("www.healthyfoodsgrocery.com")
-print("------------------------------------")
-
-import datetime
-purchase_time = datetime.datetime.now()
-print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
-print("------------------------------------")
 
 
 total_price = 0
@@ -52,13 +43,27 @@ while True:
  
 #print(selected_items)
 
+print("---------------------------------------------------")
+print("Healthy Foods Grocery")
+print("www.healthyfoodsgrocery.com")
+print("---------------------------------------------------")
+
+import datetime
+purchase_time = datetime.datetime.now()
+print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
+print("---------------------------------------------------")
+
+
+print("Selected products: ")
 for cashier_input in selected_items: 
     matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
     matching_product = matching_products[0]
     total_price = total_price + matching_product["price"]
-    print ("Selected products: " + matching_product["name"] + " " + str(matching_product["price"]))
+    price_usd = "${0:.2f}".format(matching_product["price"])
+    print("... " + matching_product["name"] + " (" + str(price_usd) + ")")
 
-print("Total price: " + str(total_price))
+print("---------------------------------------------------")
+print("Subtotal: " + "$" + str(total_price))
 
         #product_names = [p["name"] for p in products]
         #x = [hello" for p in products]
