@@ -36,18 +36,19 @@ selected_items = []
 
 
 id_list = []
-for ids in products:
-    id_list.append(ids["id"])
+for p in products:
+    id_list.append(str(p["id"]))
+    #breakpoint()
+
 
 #unique_ids = list(set(id_list))
-
 
 while True:
     cashier_input = input("Please input a product identifier: ")
     if cashier_input == "DONE":
         break
     elif cashier_input not in id_list:
-        print ("Sorry, item not found. Please try again!")
+        print ("Sorry, item not found. Please try again...")
     else:
         selected_items.append(cashier_input)
  
