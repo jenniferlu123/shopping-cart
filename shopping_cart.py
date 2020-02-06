@@ -25,10 +25,6 @@ products = [
     {"id":20, "name": "Pomegranate Cranberry & Aloe Vera Enrich Drink", "department": "beverages", "aisle": "juice nectars", "price": 4.25}
 ] # based on data from Instacart: https://www.instacart.com/datasets/grocery-shopping-2017
 
-#print(products)
-# pprint(products)
-
-
 
 
 total_price = 0
@@ -38,8 +34,6 @@ selected_items = []
 id_list = []
 for p in products:
     id_list.append(str(p["id"]))
-    #breakpoint()
-
 
 #unique_ids = list(set(id_list))
 
@@ -55,8 +49,10 @@ while True:
 #print(selected_items)
 
 print("-----------------------------------------------------------")
-print("Healthy Foods Grocery")
-print("www.healthyfoodsgrocery.com")
+print("GU Healthy Foods")
+print("3700 O ST NW Washington DC")
+print("Phone: (202)-495-3439")
+print("Website: www.guhealthyfoods.com")
 print("-----------------------------------------------------------")
 
 import datetime
@@ -85,7 +81,8 @@ total_amount_usd = "${0:.2f}".format(total_amount)
 print("Total: " + str(total_amount_usd))
 
 print("-----------------------------------------------------------")
-print("Thanks for shopping with us. Hope to see you again soon")
+print("Thanks for shopping with us!")
+print("Hope to see you again soon.")
 print("-----------------------------------------------------------")
 
 
