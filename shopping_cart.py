@@ -26,6 +26,9 @@ products = [
 ] # based on data from Instacart: https://www.instacart.com/datasets/grocery-shopping-2017
 
 
+from dotenv import load_dotenv
+import os
+
 
 total_price = 0
 selected_items = []
@@ -70,9 +73,17 @@ for cashier_input in selected_items:
     print("... " + matching_product["name"] + " (" + str(price_usd) + ")")
 
 print("-----------------------------------------------------------")
-print("Subtotal: " + "$" + str(total_price))
+total_price_usd = "${0:.2f}".format(total_price)
+print("Subtotal: " + str(total_price_usd))
 
-tax = total_price*0.0875
+#FURTHER CHALLENGE: configuring sales tax rate
+#Code Source for this challenge: Online notes on dotenv package:
+#https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/packages/dotenv.md
+
+load_dotenv() 
+
+tax_rate_input = float(os.environ.get("tax_rate"))
+tax = total_price*(tax_rate_input)
 tax_usd = "${0:.2f}".format(tax)
 print("Tax: " + str(tax_usd))
 
@@ -90,4 +101,4 @@ print("-----------------------------------------------------------")
 
 
         #product_names = [p["name"] for p in products]
-        #x = [hello" for p in products]
+        #x = ["hello" for p in products]
