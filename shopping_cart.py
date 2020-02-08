@@ -26,14 +26,10 @@ products = [
     {"id":21, "name": "Organic Bananas", "department": "fruit", "aisle": "fruit", "price": 0.79, "price_per": "pound"}
 ] # based on data from Instacart: https://www.instacart.com/datasets/grocery-shopping-2017
 
+
 import datetime
 from dotenv import load_dotenv
 import os
-
-total_price = 0
-total_price_pounds = 0
-selected_items = []
-selected_pounds = []
 
 id_list = []
 for p in products:
@@ -44,14 +40,14 @@ for p in products:
 #    id_list.append
 def id_pound(p):
     return p["price_per"] == "pound"
-#pound_list = list(filter(id_pound,products))
 
 id_pound_list = []
 for pound_id in list(filter(id_pound,products)):
     id_pound_list.append(str(pound_id["id"]))
 #print(id_pound_list)
 
-#unique_ids = list(set(id_list))
+selected_items = []
+selected_pounds = []
 
 while True:
     cashier_input = input("Please input a product identifier: ")
@@ -60,27 +56,29 @@ while True:
     elif cashier_input not in id_list:
         print ("Sorry, item not found. Please try again...")
     elif cashier_input in id_pound_list:
-        pounds_input = input("Please input how many pounds:")        
-        selected_pounds.append(cashier_input)
-        #matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
-        #matching_product = matching_products[0]
-        #total_price_pounds = total_price_pounds + (matching_product["price"]*(float(pounds_input))
+        pounds_input = input("Please input how many pounds: ")        
+        selected_pounds.append({"id":cashier_input, "pounds":pounds_input})
+        #selected_items.append(cashier_input)
     else:
         selected_items.append(cashier_input)
- 
-print("-----------------------------------------------------------")
+
+print("-----------------------------------------------------")
 print("GU Healthy Foods")
 print("3700 O ST NW Washington DC")
 print("Phone: (202)-495-3439")
 print("Website: www.guhealthyfoods.com")
-print("-----------------------------------------------------------")
+print("-----------------------------------------------------")
 
 purchase_time = datetime.datetime.now()
 print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
-print("-----------------------------------------------------------")
+print("-----------------------------------------------------")
 
 
 print("Selected products: ")
+
+total_price = 0
+total_price_pounds = 0
+
 for cashier_input in selected_items: 
     matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
     matching_product = matching_products[0]
@@ -88,21 +86,21 @@ for cashier_input in selected_items:
     price_usd = "${0:.2f}".format(matching_product["price"])
     print("... " + matching_product["name"] + " (" + str(price_usd) + ")")
 
-for cashier_input in selected_pounds:
-    matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
+for d in selected_pounds:
+    matching_products = [p for p in products if str(p["id"]) == str(d["id"])]
     matching_product = matching_products[0]
-    total_pounds = matching_product["price"]*(float(pounds_input))
-    total_price_pounds = total_price_pounds + total_pounds
+    total_pounds = matching_product["price"]*(float(d["pounds"]))
+    total_price = total_price + total_pounds
     price_pounds_usd = "${0:.2f}".format(total_pounds)
     print("... " + matching_product["name"] + " (" + str(price_pounds_usd) + ")")
 
 
-print("-----------------------------------------------------------")
-total_price_usd = "${0:.2f}".format(total_price + total_price_pounds)
+print("-----------------------------------------------------")
+total_price_usd = "${0:.2f}".format(total_price)
 print("Subtotal: " + str(total_price_usd))
 
 #FURTHER CHALLENGE: configuring sales tax rate
-#Code Source for this challenge: Online notes on dotenv package:
+#Code source for this challenge: Online notes on dotenv package:
 #https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/packages/dotenv.md
 
 load_dotenv() 
@@ -116,14 +114,100 @@ total_amount = total_price + tax
 total_amount_usd = "${0:.2f}".format(total_amount)
 print("Total: " + str(total_amount_usd))
 
-print("-----------------------------------------------------------")
+print("-----------------------------------------------------")
 print("Thanks for shopping with us!")
 print("Hope to see you again soon.")
-print("-----------------------------------------------------------")
+print("-----------------------------------------------------")
 
 
+#FURTHER CHALLENGE: writing receipts to file
+#Code source for this challenge: Online notes on python file management:
+#https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/file-management.md
 
+file_name = "receipts//" + purchase_time.strftime("%Y-%m-%d-%H-%M-%S-%f") + ".txt"
 
+with open(file_name, "w") as file: 
+    file.write("GU Healthy Foods")
+    file.write("\n")
+    file.write("3700 O ST NW Washington DC")
+    file.write("\n")
+    file.write("Phone: (202)-495-3439")
+    file.write("\n")
+    file.write("Website: www.guhealthyfoods.com")
+    file.write("\n")
+    file.write("-----------------------------------------------------")
+    file.write("\n")
+    file.write("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
+    file.write("\n")
+    file.write("-----------------------------------------------------")
+    file.write("\n")
+    file.write("Selected products: ")
+    file.write("\n")
+    for cashier_input in selected_items:
+        matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
+        matching_product = matching_products[0]
+        total_price = total_price + matching_product["price"]
+        price_usd = "${0:.2f}".format(matching_product["price"])
+        file.write("... " + matching_product["name"] + " (" + str(price_usd) + ")")
+        file.write("\n")
+    for d in selected_pounds:
+        matching_products = [p for p in products if str(p["id"]) == str(d["id"])]
+        matching_product = matching_products[0]
+        total_pounds = matching_product["price"]*(float(d["pounds"]))
+        total_price = total_price + total_pounds
+        price_pounds_usd = "${0:.2f}".format(total_pounds)
+        file.write("... " + matching_product["name"] + " (" + str(price_pounds_usd) + ")")
+        file.write("\n")
+    file.write("-----------------------------------------------------")
+    file.write("\n")
+    file.write("Subtotal: " + str(total_price_usd))
+    file.write("\n")
+    file.write("Tax: " + str(tax_usd))
+    file.write("\n")
+    file.write("Total: " + str(total_amount_usd))
+    file.write("\n")
+    file.write("-----------------------------------------------------")
+    file.write("\n")
+    file.write("Thanks for shopping with us!")
+    file.write("\n")
+    file.write("Hope to see you again soon.")
+    file.write("\n")
+    file.write("-----------------------------------------------------")
 
-        #product_names = [p["name"] for p in products]
-        #x = ["hello" for p in products]
+    
+    
+
+#FURTHER CHALLENGE: sending receipts via email
+#Code source for this challenge: Online notes on Sendgrid
+# https://github.com/prof-rossetti/georgetown-opim-243-201901/blob/master/notes/python/packages/sendgrid.md
+
+import sendgrid
+from sendgrid.helpers.mail import * # source of Email, Content, Mail, etc.
+
+load_dotenv()
+
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "OOPS, please set env var called 'SENDGRID_API_KEY'")
+MY_EMAIL_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS", "OOPS, please set env var called 'MY_EMAIL_ADDRESS'")
+
+# AUTHENTICATE
+
+sg = sendgrid.SendGridAPIClient(apikey=SENDGRID_API_KEY)
+
+# COMPILE REQUEST PARAMETERS (PREPARE THE EMAIL)
+
+from_email = Email(MY_EMAIL_ADDRESS)
+to_email = Email(MY_EMAIL_ADDRESS)
+subject = "Hello World from the SendGrid Python Library!"
+content = Content("text/plain", "Hello, Email!")
+mail = Mail(from_email, subject, to_email, content)
+
+# ISSUE REQUEST (SEND EMAIL)
+
+response = sg.client.mail.send.post(request_body=mail.get())
+
+# PARSE RESPONSE
+
+print(response.status_code) #> 202 means success
+print(response.body) #> this might be empty. it's ok.
+print(response.headers)
+    
