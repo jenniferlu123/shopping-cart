@@ -32,10 +32,12 @@ from dotenv import load_dotenv
 import os
 import pandas
 import statistics
-from decimal import Decimal
 
-from dotenv import load_dotenv
-import os
+
+# FURTHER CHALLENGE: integrating with a Google Sheets datastore
+# Code source: online notes on gspread package 
+# Also consulted Ahmad Wilson on some set-up questions. 
+# https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/packages/gspread.md
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -45,9 +47,7 @@ load_dotenv()
 DOCUMENT_ID = os.environ.get("GOOGLE_SHEET_ID", "OOPS")
 SHEET_NAME = os.environ.get("SHEET_NAME", "products")
 
-#
 # AUTHORIZATION
-#
 
 CREDENTIALS_FILEPATH = os.path.join(os.path.dirname(__file__), "auth", "spreadsheet_credentials.json")
 
@@ -58,9 +58,7 @@ AUTH_SCOPE = [
 
 credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILEPATH, AUTH_SCOPE)
 
-#
 # READ SHEET VALUES
-#
 
 client = gspread.authorize(credentials) #> <class 'gspread.client.Client'>
 
@@ -71,14 +69,19 @@ sheet = doc.worksheet(SHEET_NAME) #> <class 'gspread.models.Worksheet'>
 rows = sheet.get_all_records() #> <class 'list'>
 products = [r for r in rows]
 
-#FUTHER CHALLENGE: reading from CSV FILE
+
+
+## FUTHER CHALLENGE: reading from CSV FILE
+#
 #csv_filepath = os.path.join(os.path.dirname(__file__), "products.csv")
 #products_csv = pandas.read_csv(csv_filepath) # products is a data frame
-
+#
 #Convert dataframe to list of dictionaries
 #products = products_csv.to_dict("records") 
 
-#Define some variables to be used during the cashier input process 
+
+# Create lists to store cashier inputs:
+
 id_list = []
 for p in products:
     id_list.append(str(p["id"]))
@@ -93,22 +96,25 @@ for pound_id in list(filter(id_pound,products)):
 selected_items = []
 selected_pounds = []
 
-#Cashier inputting identifiers (ids):
+# WHILE LOOP used for cashier to enter product identifiers (ids):
 while True:
     cashier_input = input("Please input a product identifier: ")
     if cashier_input == "DONE":
-        customer_email_address = input("Please enter your email address to received a copy of your receipt, otherwise enter NO: ")
+        customer_email_address = input("Please enter your email address to receive a copy of your receipt. Otherwise enter NO: ")
         break
     elif cashier_input not in id_list:
         print ("Sorry, item not found. Please try again...")
     elif cashier_input in id_pound_list:
-        pounds_input = input("Please input how many pounds: ")
-        if isinstance(pounds_input,float) or isinstance(pounds_input,int):
+        pounds_input = input("Please input how many pounds rounded to the nearest integer: ")
+        if pounds_input.isnumeric():
             selected_pounds.append({"id":cashier_input, "pounds":pounds_input})
         else:       
             print ("Please try again and enter a valid number.")
     else:
         selected_items.append(cashier_input)
+
+
+# Print grocery store information (shown on receipt header):
 
 print("-----------------------------------------------------")
 print("GU Healthy Foods")
@@ -121,6 +127,8 @@ purchase_time = datetime.datetime.now()
 print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
 print("-----------------------------------------------------")
 
+
+# Print list of items purchased:
 
 print("Selected products: ")
 
@@ -142,10 +150,12 @@ for d in selected_pounds:
     price_pounds_usd = "${0:.2f}".format(total_pounds)
     print("... " + matching_product["name"] + " (" + str(price_pounds_usd) + ")")
 
+# Print subtotal:
 
 print("-----------------------------------------------------")
 total_price_usd = "${0:.2f}".format(total_price)
 print("Subtotal: " + str(total_price_usd))
+
 
 #FURTHER CHALLENGE: configuring sales tax rate
 #Code source for this challenge: Online notes on dotenv package:
@@ -158,9 +168,13 @@ tax = total_price*(tax_rate_input)
 tax_usd = "${0:.2f}".format(tax)
 print("Tax: " + str(tax_usd))
 
+# Print total purchase price:
+
 total_amount = total_price + tax
 total_amount_usd = "${0:.2f}".format(total_amount)
 print("Total: " + str(total_amount_usd))
+
+# Print thank you message:
 
 print("-----------------------------------------------------")
 print("Thanks for shopping with us!")
@@ -168,65 +182,71 @@ print("Hope to see you again soon.")
 print("-----------------------------------------------------")
 
 
-#FURTHER CHALLENGE: writing receipts to file
-#Code source for this challenge: Online notes on python file management:
-#https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/file-management.md
+# FURTHER CHALLENGE: writing receipts to file
+# Code source for this challenge: Online notes on python file management:
+# Consulted Ahmad Wilson in creating a variable to store the receipt message
+# https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/file-management.md
+
+# Variable "receipt_message" is created to store the entire message to be shown on the receipt 
+
+receipt_message = "-----------------------------------------------------"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "GU Healthy Foods"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "3700 O ST NW Washington DC"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Phone: (202)-495-3439"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Website: www.guhealthyfoods.com"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p")
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Selected products: "
+receipt_message = receipt_message + "\n"
+for cashier_input in selected_items:
+    matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
+    matching_product = matching_products[0]
+    total_price = total_price + matching_product["price"]
+    price_usd = "${0:.2f}".format(matching_product["price"])
+    receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(price_usd) + ")"
+    receipt_message = receipt_message + "\n"
+for d in selected_pounds:
+    matching_products = [p for p in products if str(p["id"]) == str(d["id"])]
+    matching_product = matching_products[0]
+    total_pounds = matching_product["price"]*(float(d["pounds"]))
+    total_price = total_price + total_pounds
+    price_pounds_usd = "${0:.2f}".format(total_pounds)
+    receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(price_pounds_usd) + ")"
+    receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Subtotal: " + str(total_price_usd)
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Tax: " + str(tax_usd)
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Total: " + str(total_amount_usd)
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Thanks for shopping with us!"
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "Hope to see you again soon."
+receipt_message = receipt_message + "\n"
+receipt_message = receipt_message + "-----------------------------------------------------"
+
+# txt file automatically created containing receipt details:
 
 file_name = "receipts//" + purchase_time.strftime("%Y-%m-%d-%H-%M-%S-%f") + ".txt"
+with open(file_name, "w") as file:
+    file.write(receipt_message)
 
-with open(file_name, "w") as file: 
-    file.write("-----------------------------------------------------")
-    file.write("\n")
-    file.write("GU Healthy Foods")
-    file.write("\n")
-    file.write("3700 O ST NW Washington DC")
-    file.write("\n")
-    file.write("Phone: (202)-495-3439")
-    file.write("\n")
-    file.write("Website: www.guhealthyfoods.com")
-    file.write("\n")
-    file.write("-----------------------------------------------------")
-    file.write("\n")
-    file.write("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
-    file.write("\n")
-    file.write("-----------------------------------------------------")
-    file.write("\n")
-    file.write("Selected products: ")
-    file.write("\n")
-    for cashier_input in selected_items:
-        matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
-        matching_product = matching_products[0]
-        total_price = total_price + matching_product["price"]
-        price_usd = "${0:.2f}".format(matching_product["price"])
-        file.write("... " + matching_product["name"] + " (" + str(price_usd) + ")")
-        file.write("\n")
-    for d in selected_pounds:
-        matching_products = [p for p in products if str(p["id"]) == str(d["id"])]
-        matching_product = matching_products[0]
-        total_pounds = matching_product["price"]*(float(d["pounds"]))
-        total_price = total_price + total_pounds
-        price_pounds_usd = "${0:.2f}".format(total_pounds)
-        file.write("... " + matching_product["name"] + " (" + str(price_pounds_usd) + ")")
-        file.write("\n")
-    file.write("-----------------------------------------------------")
-    file.write("\n")
-    file.write("Subtotal: " + str(total_price_usd))
-    file.write("\n")
-    file.write("Tax: " + str(tax_usd))
-    file.write("\n")
-    file.write("Total: " + str(total_amount_usd))
-    file.write("\n")
-    file.write("-----------------------------------------------------")
-    file.write("\n")
-    file.write("Thanks for shopping with us!")
-    file.write("\n")
-    file.write("Hope to see you again soon.")
-    file.write("\n")
-    file.write("-----------------------------------------------------")
 
-    
-#FURTHER CHALLENGE: sending receipts via email
-#Code source for this challenge: Online notes on Sendgrid
+# FURTHER CHALLENGE: sending receipts via email
+# Code source for this challenge: Online notes on Sendgrid
 # https://github.com/prof-rossetti/notification-service-py/blob/master/app/send_email.py 
 
 import os
@@ -250,53 +270,13 @@ else:
 
     # PREPARE THE EMAIL
 
-    email_body = ("Hello! This is your receipt. \n\nDate of purchase: " + 
-    purchase_time.strftime("%Y-%m-%d %I:%M %p") + 
-    "\nTotal amount: " + total_amount_usd + 
-    "\n\nThank you for shopping with us!")
-
     from_email = Email(MY_EMAIL_ADDRESS)
     to_email = Email(customer_email_address) #asked for customer address during checkout process after "DONE"
     subject = "GU Healthy Foods Receipt"
-    message_text = email_body
+    message_text = receipt_message
     content = Content("text/plain", message_text)
     mail = Mail(from_email, subject, to_email, content)
 
     # SEND EMAIL
 
     response = sg.client.mail.send.post(request_body=mail.get())
-
-
-
-
-
-
-
-#
-##
-## WRITE VALUES TO SHEET
-##
-#
-#next_id = len(rows) + 1 # TODO: should change this to be one greater than the current maximum id value
-#
-#next_object = {
-#    "id": next_id,
-#    "name": f"Product {next_id}",
-#    "department": "snacks",
-#    "price": 4.99,
-#    "availability_date": "2019-01-01"
-#}
-#
-#next_row = list(next_object.values()) #> [13, 'Product 13', 'snacks', 4.99, '2019-01-01']
-#
-#next_row_number = len(rows) + 2 # number of records, plus a header row, plus one
-#
-#response = sheet.insert_row(next_row, next_row_number)
-#
-#print("-----------------")
-#print("NEW RECORD:")
-#print(next_row)
-#print("-----------------")
-#print("RESPONSE")
-#print(type(response)) #> dict
-#print(response) #> {'spreadsheetId': '___', 'updatedRange': '___', 'updatedRows': 1, 'updatedColumns': 5, 'updatedCells': 5}
