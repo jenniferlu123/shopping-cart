@@ -30,46 +30,83 @@
 import datetime
 from dotenv import load_dotenv
 import os
-
 import pandas
 import statistics
+from decimal import Decimal
 
-#READ CSV FILE
-csv_filepath = os.path.join(os.path.dirname(__file__), "products.csv")
-products_csv = pandas.read_csv(csv_filepath) # products is a data frame
+from dotenv import load_dotenv
+import os
 
-#CONVERT DATAFRAME TO LIST OF DICTIONARIES
-products = products_csv.to_dict("records") 
-#print(sales_report)
-#print(type(sales_report[0]))
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
+load_dotenv()
+
+DOCUMENT_ID = os.environ.get("GOOGLE_SHEET_ID", "OOPS")
+SHEET_NAME = os.environ.get("SHEET_NAME", "products")
+
+#
+# AUTHORIZATION
+#
+
+CREDENTIALS_FILEPATH = os.path.join(os.path.dirname(__file__), "auth", "spreadsheet_credentials.json")
+
+AUTH_SCOPE = [
+    "https://www.googleapis.com/auth/spreadsheets", #> Allows read/write access to the user's sheets and their properties.
+    "https://www.googleapis.com/auth/drive.file" #> Per-file access to files created or opened by the app.
+]
+
+credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILEPATH, AUTH_SCOPE)
+
+#
+# READ SHEET VALUES
+#
+
+client = gspread.authorize(credentials) #> <class 'gspread.client.Client'>
+
+doc = client.open_by_key(DOCUMENT_ID) #> <class 'gspread.models.Spreadsheet'>
+
+sheet = doc.worksheet(SHEET_NAME) #> <class 'gspread.models.Worksheet'>
+
+rows = sheet.get_all_records() #> <class 'list'>
+products = [r for r in rows]
+
+#FUTHER CHALLENGE: reading from CSV FILE
+#csv_filepath = os.path.join(os.path.dirname(__file__), "products.csv")
+#products_csv = pandas.read_csv(csv_filepath) # products is a data frame
+
+#Convert dataframe to list of dictionaries
+#products = products_csv.to_dict("records") 
+
+#Define some variables to be used during the cashier input process 
 id_list = []
 for p in products:
     id_list.append(str(p["id"]))
 
-#id_list_pound = []
-#for p in products:
-#    id_list.append
 def id_pound(p):
     return p["price_per"] == "pound"
 
 id_pound_list = []
 for pound_id in list(filter(id_pound,products)):
     id_pound_list.append(str(pound_id["id"]))
-#print(id_pound_list)
 
 selected_items = []
 selected_pounds = []
 
+#Cashier inputting identifiers (ids):
 while True:
     cashier_input = input("Please input a product identifier: ")
     if cashier_input == "DONE":
+        customer_email_address = input("Please enter your email address to received a copy of your receipt, otherwise enter NO: ")
         break
     elif cashier_input not in id_list:
         print ("Sorry, item not found. Please try again...")
     elif cashier_input in id_pound_list:
-        pounds_input = input("Please input how many pounds: ")        
-        selected_pounds.append({"id":cashier_input, "pounds":pounds_input})
+        pounds_input = input("Please input how many pounds: ")
+        if isinstance(pounds_input,float) or isinstance(pounds_input,int):
+            selected_pounds.append({"id":cashier_input, "pounds":pounds_input})
+        else:       
+            print ("Please try again and enter a valid number.")
     else:
         selected_items.append(cashier_input)
 
@@ -139,6 +176,7 @@ file_name = "receipts//" + purchase_time.strftime("%Y-%m-%d-%H-%M-%S-%f") + ".tx
 
 with open(file_name, "w") as file: 
     file.write("-----------------------------------------------------")
+    file.write("\n")
     file.write("GU Healthy Foods")
     file.write("\n")
     file.write("3700 O ST NW Washington DC")
@@ -187,55 +225,78 @@ with open(file_name, "w") as file:
     file.write("-----------------------------------------------------")
 
     
-    
-
 #FURTHER CHALLENGE: sending receipts via email
 #Code source for this challenge: Online notes on Sendgrid
-# https://github.com/prof-rossetti/georgetown-opim-243-201901/blob/master/notes/python/packages/sendgrid.md
+# https://github.com/prof-rossetti/notification-service-py/blob/master/app/send_email.py 
 
-#import os
-#from dotenv import load_dotenv
-#from sendgrid import SendGridAPIClient
-#from sendgrid.helpers.mail import Mail
+import os
+import pprint
+    
+from dotenv import load_dotenv
+import sendgrid
+from sendgrid.helpers.mail import * # source of Email, Content, Mail, etc.
+
+if customer_email_address == "NO":
+    pass
+else:
+    load_dotenv()
+
+    SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "OOPS, please set env var called 'SENDGRID_API_KEY'")
+    MY_EMAIL_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS", "OOPS, please set env var called 'MY_EMAIL_ADDRESS'")
+
+    # AUTHENTICATE
+
+    sg = sendgrid.SendGridAPIClient(apikey=SENDGRID_API_KEY)
+
+    # PREPARE THE EMAIL
+
+    email_body = ("Hello! This is your receipt. \n\nDate of purchase: " + 
+    purchase_time.strftime("%Y-%m-%d %I:%M %p") + 
+    "\nTotal amount: " + total_amount_usd + 
+    "\n\nThank you for shopping with us!")
+
+    from_email = Email(MY_EMAIL_ADDRESS)
+    to_email = Email(customer_email_address) #asked for customer address during checkout process after "DONE"
+    subject = "GU Healthy Foods Receipt"
+    message_text = email_body
+    content = Content("text/plain", message_text)
+    mail = Mail(from_email, subject, to_email, content)
+
+    # SEND EMAIL
+
+    response = sg.client.mail.send.post(request_body=mail.get())
+
+
+
+
+
+
+
 #
-#load_dotenv()
+##
+## WRITE VALUES TO SHEET
+##
 #
-#SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "OOPS, please set env var called 'SENDGRID_API_KEY'")
-#SENDGRID_TEMPLATE_ID = os.environ.get("SENDGRID_TEMPLATE_ID", "OOPS, please set env var called 'SENDGRID_TEMPLATE_ID'")
-#MY_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS", "OOPS, please set env var called 'MY_EMAIL_ADDRESS'")
+#next_id = len(rows) + 1 # TODO: should change this to be one greater than the current maximum id value
 #
-##print("API KEY:", SENDGRID_API_KEY)
-##print("TEMPLATE ID:", SENDGRID_TEMPLATE_ID)
-##print("EMAIL ADDRESS:", MY_ADDRESS)
+#next_object = {
+#    "id": next_id,
+#    "name": f"Product {next_id}",
+#    "department": "snacks",
+#    "price": 4.99,
+#    "availability_date": "2019-01-01"
+#}
 #
-#template_data = {
-#    "total_price_usd": total_amount_usd,
-#    "human_friendly_timestamp": purchase_time.strftime("%Y-%m-%d %I:%M %p") ,
-#    "products":[
-#        {"id":1, "name": "Product 1"},
-#        {"id":2, "name": "Product 2"},
-#        {"id":3, "name": "Product 3"},
-#        {"id":2, "name": "Product 2"},
-#        {"id":1, "name": "Product 1"}
-#    ]
-#} # or construct this dictionary dynamically based on the results of some other process :-D
+#next_row = list(next_object.values()) #> [13, 'Product 13', 'snacks', 4.99, '2019-01-01']
 #
-#client = SendGridAPIClient(SENDGRID_API_KEY)
-#print("CLIENT:", type(client))
+#next_row_number = len(rows) + 2 # number of records, plus a header row, plus one
 #
-#message = Mail(from_email=MY_ADDRESS, to_email=MY_ADDRESS)
-#print("MESSAGE:", type(message))
+#response = sheet.insert_row(next_row, next_row_number)
 #
-#message.template_id = SENDGRID_TEMPLATE_ID
-#
-#message.dynamic_template_data = template_data
-#
-#try:
-#    response = client.send(message)
-#    print("RESPONSE:", type(response))
-#    print(response.status_code)
-#    print(response.body)
-#    print(response.headers)
-#
-#except Exception as e:
-#    print("OOPS", e)
+#print("-----------------")
+#print("NEW RECORD:")
+#print(next_row)
+#print("-----------------")
+#print("RESPONSE")
+#print(type(response)) #> dict
+#print(response) #> {'spreadsheetId': '___', 'updatedRange': '___', 'updatedRows': 1, 'updatedColumns': 5, 'updatedCells': 5}
