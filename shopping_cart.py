@@ -27,6 +27,7 @@
 
 import datetime
 from dotenv import load_dotenv
+import pandas
 import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -50,12 +51,11 @@ SHEET_NAME = os.environ.get("SHEET_NAME", "products")
 CREDENTIALS_FILEPATH = os.path.join(os.path.dirname(__file__), "auth", "spreadsheet_credentials.json")
 
 AUTH_SCOPE = [
-    "https://www.googleapis.com/auth/spreadsheets", #> Allows read/write access to the user's sheets and their properties.
-    "https://www.googleapis.com/auth/drive.file" #> Per-file access to files created or opened by the app.
+    "https://www.googleapis.com/auth/spreadsheets", 
+    "https://www.googleapis.com/auth/drive.file" 
 ]
 
 credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILEPATH, AUTH_SCOPE)
-
 # READ SHEET VALUES
 
 client = gspread.authorize(credentials) 
@@ -63,6 +63,7 @@ doc = client.open_by_key(DOCUMENT_ID)
 sheet = doc.worksheet(SHEET_NAME) 
 
 rows = sheet.get_all_records() 
+
 products = [r for r in rows]
 
 
@@ -72,7 +73,7 @@ products = [r for r in rows]
 #csv_filepath = os.path.join(os.path.dirname(__file__), "products.csv")
 #products_csv = pandas.read_csv(csv_filepath) # products is a dataframe
 #
-#Convert dataframe to a list of dictionaries
+##Convert dataframe to a list of dictionaries
 #products = products_csv.to_dict("records") 
 
 
