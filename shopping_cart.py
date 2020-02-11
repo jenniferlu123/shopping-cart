@@ -133,7 +133,6 @@ print("--------------------------------------------------")
 print("Selected products: ")
 
 total_price = 0
-#total_price_pounds = 0
 
 for cashier_input in selected_items: 
     matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
