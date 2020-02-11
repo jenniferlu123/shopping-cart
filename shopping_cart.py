@@ -38,8 +38,8 @@ from sendgrid.helpers.mail import *
 
 # FURTHER CHALLENGE: integrating with a Google Sheets datastore
 # Code source: online notes on gspread package 
-# Also consulted Ahmad Wilson on set-up instructions
 # https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/packages/gspread.md
+# Also discussed with Ahmad Wilson on set-up instructions
 
 load_dotenv()
 
@@ -56,6 +56,7 @@ AUTH_SCOPE = [
 ]
 
 credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILEPATH, AUTH_SCOPE)
+
 # READ SHEET VALUES
 
 client = gspread.authorize(credentials) 
@@ -90,6 +91,7 @@ id_pound_list = []
 for pound_id in list(filter(id_pound,products)):
     id_pound_list.append(str(pound_id["id"]))
 
+
 # Use WHILE LOOP to allow cashier to enter product identifiers:
 
 selected_items = []
@@ -103,7 +105,7 @@ while True:
     elif cashier_input not in id_list:
         print ("Sorry, product not found. Please try again...")
     elif cashier_input in id_pound_list:
-        pounds_input = input("Please enter how many pounds rounded to the nearest integer: ")
+        pounds_input = input("Please enter the number of pounds rounded to the nearest integer: ")
         if pounds_input.isnumeric():
             selected_pounds.append({"id":cashier_input, "pounds":pounds_input})
         else:       
@@ -116,7 +118,7 @@ while True:
 
 print("--------------------------------------------------")
 print("GU Healthy Foods")
-print("3700 O ST NW Washington DC")
+print("3700 O ST NW, Washington DC")
 print("Phone: (202)-495-3439")
 print("Website: www.guhealthyfoods.com")
 print("--------------------------------------------------")
@@ -131,7 +133,7 @@ print("--------------------------------------------------")
 print("Selected products: ")
 
 total_price = 0
-total_price_pounds = 0
+#total_price_pounds = 0
 
 for cashier_input in selected_items: 
     matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
@@ -148,11 +150,13 @@ for d in selected_pounds:
     price_pounds_usd = "${0:.2f}".format(total_pounds)
     print("... " + matching_product["name"] + " (" + str(price_pounds_usd) + ")")
 
+
 # Print subtotal:
 
 print("--------------------------------------------------")
 total_price_usd = "${0:.2f}".format(total_price)
 print("Subtotal: " + str(total_price_usd))
+
 
 
 #FURTHER CHALLENGE: configuring sales tax rate
@@ -166,11 +170,13 @@ tax = total_price*(tax_rate_input)
 tax_usd = "${0:.2f}".format(tax)
 print("Tax: " + str(tax_usd))
 
+
 # Print total purchase price:
 
 total_amount = total_price + tax
 total_amount_usd = "${0:.2f}".format(total_amount)
 print("Total: " + str(total_amount_usd))
+
 
 # Print thank you message:
 
@@ -180,10 +186,12 @@ print("Hope to see you again soon.")
 print("--------------------------------------------------")
 
 
+
 # FURTHER CHALLENGE: writing receipts to file
 # Code source for this challenge: Online notes on python file management:
-# Consulted Ahmad Wilson in creating a variable to store the receipt message
 # https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/file-management.md
+# Also discussed with Ahmad Wilson on creating a variable to store the receipt message
+
 
 # Variable "receipt_message" is created to store the entire message to be shown on the receipt 
 
@@ -236,11 +244,13 @@ receipt_message = receipt_message + "Hope to see you again soon."
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "--------------------------------------------------"
 
-# txt file automatically created with the receipt details:
+
+# txt file automatically created with receipt details:
 
 file_name = "receipts//" + purchase_time.strftime("%Y-%m-%d-%H-%M-%S-%f") + ".txt"
 with open(file_name, "w") as file:
     file.write(receipt_message)
+
 
 
 # FURTHER CHALLENGE: sending receipts via email

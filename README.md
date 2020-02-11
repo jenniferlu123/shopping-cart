@@ -49,12 +49,12 @@ Open the file named ".env" and update the tax rate to the one that is appropriat
 
 If you are interested in using this program's email capabilities to send out receipts to customers, please update the Sendgrid API key (obtained using your Sendgrid account) and your email address in the ".env" file: 
 
-    SENDGRID_API_KEY= "EXAMPLE" 
-    MY_EMAIL_ADDRESS= "EXAMPLE" 
+    SENDGRID_API_KEY="EXAMPLE" 
+    MY_EMAIL_ADDRESS="EXAMPLE" 
 
 ## Google Sheet Database set up
 
-If you are interested in using a Google Sheet Database, please update the Google Sheet ID in the ".env" file using the unique identifier found in the URL of the document that contains information about your store's products:
+If you are interested in using a Google Sheet Database, please update the Google Sheet ID in the ".env" file using the unique identifier found in the URL of the document that contains the information about your store's products:
 
     GOOGLE_SHEET_ID = "EXAMPLE" 
 
@@ -75,7 +75,7 @@ python shopping_cart.py
 
 3. The program will ask for the customer's email address where they would like to receive a copy of the receipt. If they prefer to opt out of this option, enter NO
 
-4. The receipt will be automatically generated on the screen with the grocery store's information, checkout time, list of purchased items, tax, and total purchase price
+4. The receipt will be automatically generated on the screen with the grocery store's information, checkout time, list of items purchased, tax, and total purchase price
 
 5. A txt file will also be automatically generated inside the "receipts" folder. The txt file will include full receipt details. If needed, it can be used to print out a paper receipt for the customer
 
