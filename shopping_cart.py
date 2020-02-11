@@ -1,7 +1,5 @@
 # shopping_cart.py
 
-#from pprint mport pprint
-
 #products = [
 #    {"id":1, "name": "Chocolate Sandwich Cookies", "department": "snacks", "aisle": "cookies cakes", "price": 3.50, "price_per": "item"},
 #    {"id":2, "name": "All-Seasons Salt", "department": "pantry", "aisle": "spices seasonings", "price": 4.99, "price_per": "item"},
@@ -30,17 +28,17 @@
 import datetime
 from dotenv import load_dotenv
 import os
-import pandas
-import statistics
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import pprint
+import sendgrid
+from sendgrid.helpers.mail import * 
 
 
 # FURTHER CHALLENGE: integrating with a Google Sheets datastore
 # Code source: online notes on gspread package 
-# Also consulted Ahmad Wilson on some set-up questions. 
+# Also consulted Ahmad Wilson on set-up instructions
 # https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/packages/gspread.md
-
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
 load_dotenv()
 
@@ -60,13 +58,11 @@ credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILEP
 
 # READ SHEET VALUES
 
-client = gspread.authorize(credentials) #> <class 'gspread.client.Client'>
+client = gspread.authorize(credentials) 
+doc = client.open_by_key(DOCUMENT_ID) 
+sheet = doc.worksheet(SHEET_NAME) 
 
-doc = client.open_by_key(DOCUMENT_ID) #> <class 'gspread.models.Spreadsheet'>
-
-sheet = doc.worksheet(SHEET_NAME) #> <class 'gspread.models.Worksheet'>
-
-rows = sheet.get_all_records() #> <class 'list'>
+rows = sheet.get_all_records() 
 products = [r for r in rows]
 
 
@@ -74,9 +70,9 @@ products = [r for r in rows]
 ## FUTHER CHALLENGE: reading from CSV FILE
 #
 #csv_filepath = os.path.join(os.path.dirname(__file__), "products.csv")
-#products_csv = pandas.read_csv(csv_filepath) # products is a data frame
+#products_csv = pandas.read_csv(csv_filepath) # products is a dataframe
 #
-#Convert dataframe to list of dictionaries
+#Convert dataframe to a list of dictionaries
 #products = products_csv.to_dict("records") 
 
 
@@ -93,19 +89,20 @@ id_pound_list = []
 for pound_id in list(filter(id_pound,products)):
     id_pound_list.append(str(pound_id["id"]))
 
+# Use WHILE LOOP to allow cashier to enter product identifiers:
+
 selected_items = []
 selected_pounds = []
 
-# WHILE LOOP used for cashier to enter product identifiers (ids):
 while True:
-    cashier_input = input("Please input a product identifier: ")
+    cashier_input = input("Please input a product identifier. If finished, enter DONE: ")
     if cashier_input == "DONE":
         customer_email_address = input("Please enter your email address to receive a copy of your receipt. Otherwise enter NO: ")
         break
     elif cashier_input not in id_list:
-        print ("Sorry, item not found. Please try again...")
+        print ("Sorry, product not found. Please try again...")
     elif cashier_input in id_pound_list:
-        pounds_input = input("Please input how many pounds rounded to the nearest integer: ")
+        pounds_input = input("Please enter how many pounds rounded to the nearest integer: ")
         if pounds_input.isnumeric():
             selected_pounds.append({"id":cashier_input, "pounds":pounds_input})
         else:       
@@ -114,18 +111,18 @@ while True:
         selected_items.append(cashier_input)
 
 
-# Print grocery store information (shown on receipt header):
+# Print grocery store information:
 
-print("-----------------------------------------------------")
+print("--------------------------------------------------")
 print("GU Healthy Foods")
 print("3700 O ST NW Washington DC")
 print("Phone: (202)-495-3439")
 print("Website: www.guhealthyfoods.com")
-print("-----------------------------------------------------")
+print("--------------------------------------------------")
 
 purchase_time = datetime.datetime.now()
 print("Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p"))
-print("-----------------------------------------------------")
+print("--------------------------------------------------")
 
 
 # Print list of items purchased:
@@ -152,7 +149,7 @@ for d in selected_pounds:
 
 # Print subtotal:
 
-print("-----------------------------------------------------")
+print("--------------------------------------------------")
 total_price_usd = "${0:.2f}".format(total_price)
 print("Subtotal: " + str(total_price_usd))
 
@@ -176,10 +173,10 @@ print("Total: " + str(total_amount_usd))
 
 # Print thank you message:
 
-print("-----------------------------------------------------")
+print("--------------------------------------------------")
 print("Thanks for shopping with us!")
 print("Hope to see you again soon.")
-print("-----------------------------------------------------")
+print("--------------------------------------------------")
 
 
 # FURTHER CHALLENGE: writing receipts to file
@@ -189,7 +186,7 @@ print("-----------------------------------------------------")
 
 # Variable "receipt_message" is created to store the entire message to be shown on the receipt 
 
-receipt_message = "-----------------------------------------------------"
+receipt_message = "--------------------------------------------------"
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "GU Healthy Foods"
 receipt_message = receipt_message + "\n"
@@ -199,11 +196,11 @@ receipt_message = receipt_message + "Phone: (202)-495-3439"
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "Website: www.guhealthyfoods.com"
 receipt_message = receipt_message + "\n"
-receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "--------------------------------------------------"
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p")
 receipt_message = receipt_message + "\n"
-receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "--------------------------------------------------"
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "Selected products: "
 receipt_message = receipt_message + "\n"
@@ -222,7 +219,7 @@ for d in selected_pounds:
     price_pounds_usd = "${0:.2f}".format(total_pounds)
     receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(price_pounds_usd) + ")"
     receipt_message = receipt_message + "\n"
-receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "--------------------------------------------------"
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "Subtotal: " + str(total_price_usd)
 receipt_message = receipt_message + "\n"
@@ -230,15 +227,15 @@ receipt_message = receipt_message + "Tax: " + str(tax_usd)
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "Total: " + str(total_amount_usd)
 receipt_message = receipt_message + "\n"
-receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "--------------------------------------------------"
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "Thanks for shopping with us!"
 receipt_message = receipt_message + "\n"
 receipt_message = receipt_message + "Hope to see you again soon."
 receipt_message = receipt_message + "\n"
-receipt_message = receipt_message + "-----------------------------------------------------"
+receipt_message = receipt_message + "--------------------------------------------------"
 
-# txt file automatically created containing receipt details:
+# txt file automatically created with the receipt details:
 
 file_name = "receipts//" + purchase_time.strftime("%Y-%m-%d-%H-%M-%S-%f") + ".txt"
 with open(file_name, "w") as file:
@@ -249,13 +246,7 @@ with open(file_name, "w") as file:
 # Code source for this challenge: Online notes on Sendgrid
 # https://github.com/prof-rossetti/notification-service-py/blob/master/app/send_email.py 
 
-import os
-import pprint
     
-from dotenv import load_dotenv
-import sendgrid
-from sendgrid.helpers.mail import * # source of Email, Content, Mail, etc.
-
 if customer_email_address == "NO":
     pass
 else:
