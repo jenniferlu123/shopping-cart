@@ -54,7 +54,7 @@ If you are interested in using this program's email capabilities to send out rec
 
 ## Google Sheet Database set up
 
-If you are interested in using a Google Sheet Database, please update the Google Sheet ID in the ".env" file using the unique identifier found in the URL of the document that contains the information about your store's products:
+If you are interested in using a Google Sheet Database, please update the Google Sheet ID in the ".env" file using the unique identifier found in the URL code of the document that contains the information about your store's products:
 
     GOOGLE_SHEET_ID = "EXAMPLE" 
 
@@ -77,7 +77,7 @@ python shopping_cart.py
 
 4. The receipt will be automatically generated on the screen with the grocery store's information, checkout time, list of items purchased, tax, and total purchase price
 
-5. A txt file will also be automatically generated inside the "receipts" folder. The txt file will include full receipt details. If needed, it can be used to print out a paper receipt for the customer
+5. A txt file (named according to the date and time of the checkout process) will also be automatically generated and saved to the "receipts" folder. The txt file will include full receipt details. If needed, it can be used to print out a paper receipt for the customer
 
 6. If the customer entered their email address, then they will receive a copy of the receipt in their email as well
 
