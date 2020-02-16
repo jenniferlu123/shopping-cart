@@ -4,6 +4,8 @@
 
 # ignore all files in this "data" directory:
 *
+auth/spreadsheet_credentials.json
+
 
 # except this ".gitignore" file:
 !.gitignore
