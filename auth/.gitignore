@@ -1,0 +1,9 @@
+# data/.gitignore
+
+# see: https://stackoverflow.com/a/5581995/670433
+
+# ignore all files in this "data" directory:
+*
+
+# except this ".gitignore" file:
+!.gitignore
