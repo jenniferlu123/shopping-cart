@@ -1,11 +1,10 @@
-# data/.gitignore
+# auth/.gitignore
 
 # see: https://stackoverflow.com/a/5581995/670433
 
 # ignore all files in this "data" directory:
 *
 auth/spreadsheet_credentials.json
-
 
 # except this ".gitignore" file:
 !.gitignore
