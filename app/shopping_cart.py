@@ -230,7 +230,6 @@ if __name__ == "__main__":
     # Code source for this challenge: Online notes on Sendgrid
     # https://github.com/prof-rossetti/notification-service-py/blob/master/app/send_email.py 
 
-        
     if customer_email_address == "NO":
         pass
     else:
