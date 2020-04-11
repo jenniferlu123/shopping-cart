@@ -66,6 +66,20 @@ Run the python script:
 python shopping_cart.py
 ```
 
+# Testing: 
+
+Install pytest package in the virtual environment using the following command:
+
+```py
+pip install pytest
+```
+
+To run the test, use this command:
+
+```py
+pytest
+```
+
 ## Overview of the "steps" of the shopping-cart program:
 
 1. Enter each of the product's identifiers

@@ -2,9 +2,18 @@
 
 from app.shopping_cart import to_usd, time_format, calculate_taxes_owed, calculate_total_price
 
+#def test_tax_rate():
+#    assert(TAX_RATE) == 0.0875
+
 def test_to_usd():
     result = to_usd(1500)
     assert result == "$1,500.00"
+
+    result = to_usd(98.78384)
+    assert result == "$98.78"
+
+    result = to_usd(2.5)
+    assert result == "$2.50"
 
 #def test_time_format():
 #    result = time_format(2012-1-1 21:21:21)
