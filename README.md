@@ -68,13 +68,13 @@ python shopping_cart.py
 
 # Testing: 
 
-Install pytest package in the virtual environment using the following command:
+Install pytest package in running virtual environment using the following command:
 
 ```py
 pip install pytest
 ```
 
-To run the test, use this command:
+To run test, use the following python script:
 
 ```py
 pytest
