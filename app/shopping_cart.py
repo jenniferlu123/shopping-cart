@@ -23,25 +23,47 @@ def to_usd(my_price):
 def time_format(my_time):
     """
     Converts standard time expression to a friendly time display in Year-Month-Day Hour-Minute AM/PM format
-    Source:
+    Source: https://github.com/prof-rossetti/intro-to-python/blob/7adaa47921be090406fd43e2e67cbd7c72092bde/notes/python/modules/datetime.md
     Param: my_time like 2020-04-10 14:31:23.967581
     Example: time_format(2020-04-10 14:31:23.967581)
     Returns: 2020-04-10 02:31 PM
     """
     return my_time.strftime("%Y-%m-%d %I:%M %p") 
 
-def calculate_taxes_owed(my_price,my_tax_rate):
+def find_product(product_id, all_products):
     """
-    Calculated taxes by multiplying price times the appropriate tax rate
+    Finds the product information that matches the product ID entered 
+    Source: https://github.com/s2t2/shopping-cart-screencast/blob/testing/shopping_cart.py
+    Param: 
+    Example:
+    Returns:
+    """
+    matching_products = [p for p in all_products if str(p["id"]) == str(product_id)]
+    matching_product = matching_products[0]
+    return matching_product
+
+def id_pound(item):
+    """
+    Filter the items that are priced by "pound", used later in a list filter
+    source: https://github.com/prof-rossetti/intro-to-python/blob/7adaa47921be090406fd43e2e67cbd7c72092bde/notes/python/datatypes/lists.md
+    Param: 
+    Example:
+    Returns:
+    """
+    return item["price_per"] == "pound"
+
+def calculate_taxes_owed(my_price, my_tax_rate):
+    """
+    Calculate taxes by multiplying price times the appropriate tax rate
     Param: my_price (int or float) like 100.5, my_tax_rate (rate in decimal number) like 0.12
-    Example: my_price (100.5), my_tax_rate (0.0875)
+    Example: my_price (100.5), my_tax_rate (0.12)
     Returns: 12.06
     """
     return my_price * my_tax_rate
 
-def calculate_total_price (my_subtotal,my_taxes):
+def calculate_total_price (my_subtotal, my_taxes):
     """
-    Calculated total price by adding subtotal plus taxes
+    Calculate total price by adding subtotal plus taxes
     Param: my_subtotal (int or float) like 23.5, my_taxes (int or float) like 1.75
     Example: my_subtotal (23.5), my_taxes (1.75)
     Returns: 25.25
@@ -113,13 +135,13 @@ if __name__ == "__main__":
     for p in products:
         id_list.append(str(p["id"]))
 
-    def id_pound(p):
-        return p["price_per"] == "pound"
-
     id_pound_list = []
     for pound_id in list(filter(id_pound,products)):
         id_pound_list.append(str(pound_id["id"]))
 
+    #for item in id_list:
+    #    if item["price_per"] == "pound"
+    #        id_pound_list.append(str(item["id"])) 
 
     # Use WHILE LOOP to allow cashier to enter product identifiers:
 
@@ -172,15 +194,17 @@ if __name__ == "__main__":
 
     total_price = 0
     for cashier_input in selected_items:
-        matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
-        matching_product = matching_products[0]
+        matching_product = find_product(cashier_input, products)
+        #matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
+        #matching_product = matching_products[0]
         total_price = total_price + matching_product["price"]
         receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(to_usd(matching_product["price"])) + ")"
         receipt_message = receipt_message + "\n"
 
     for d in selected_pounds:
-        matching_products = [p for p in products if str(p["id"]) == str(d["id"])]
-        matching_product = matching_products[0]
+        matching_product = find_product(d["id"], products)
+        #matching_products = [p for p in products if str(p["id"]) == str(d["id"])]
+        #matching_product = matching_products[0]
         total_pounds = matching_product["price"]*(float(d["pounds"]))
         total_price = total_price + total_pounds
         receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(to_usd(total_pounds)) + ")"
