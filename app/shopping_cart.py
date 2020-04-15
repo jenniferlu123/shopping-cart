@@ -13,30 +13,29 @@ from sendgrid.helpers.mail import *
 def to_usd(my_price):
     """
     Converts a numeric value to usd-formatted string, for printing and display purposes.
+
     Source: https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/datatypes/numbers.md#formatting-as-currency
+    
     Param: my_price (int or float) like 4000.444444
+    
     Example: to_usd(4000.444444)
+    
     Returns: $4,000.44
     """
     return f"${my_price:,.2f}" 
 
-def time_format(my_time):
-    """
-    Converts standard time expression to a friendly time display in Year-Month-Day Hour-Minute AM/PM format
-    Source: https://github.com/prof-rossetti/intro-to-python/blob/7adaa47921be090406fd43e2e67cbd7c72092bde/notes/python/modules/datetime.md
-    Param: my_time like 2020-04-10 14:31:23.967581
-    Example: time_format(2020-04-10 14:31:23.967581)
-    Returns: 2020-04-10 02:31 PM
-    """
-    return my_time.strftime("%Y-%m-%d %I:%M %p") 
-
 def find_product(product_id, all_products):
     """
-    Finds the product information that matches the product ID entered 
+    Finds and returns the information of the product (from a list of products) that matches the product ID entered 
+    
     Source: https://github.com/s2t2/shopping-cart-screencast/blob/testing/shopping_cart.py
-    Param: 
-    Example:
-    Returns:
+    
+    Param: product_id is the name of the variable that stores any string/integer referring to the product ID, all_products is a list like products
+    
+    Example: find_product(cashier_input, products)
+    
+    Returns: assuming the cashier_input was 1, the result would be 
+    {"id":1, "name": "Chocolate Sandwich Cookies", "department": "snacks", "aisle": "cookies cakes", "price": 3.50, "price_per": "item"}
     """
     matching_products = [p for p in all_products if str(p["id"]) == str(product_id)]
     matching_product = matching_products[0]
@@ -44,32 +43,37 @@ def find_product(product_id, all_products):
 
 def id_pound(item):
     """
-    Filter the items that are priced by "pound", used later in a list filter
-    source: https://github.com/prof-rossetti/intro-to-python/blob/7adaa47921be090406fd43e2e67cbd7c72092bde/notes/python/datatypes/lists.md
-    Param: 
-    Example:
-    Returns:
+    Filters the items that are priced by "pound", to be used as the filtering condition later in a list filter
+    
+    Source: https://github.com/prof-rossetti/intro-to-python/blob/7adaa47921be090406fd43e2e67cbd7c72092bde/notes/python/datatypes/lists.md
+    
+    Param: item (any string)
     """
     return item["price_per"] == "pound"
 
 def calculate_taxes_owed(my_price, my_tax_rate):
     """
-    Calculate taxes by multiplying price times the appropriate tax rate
-    Param: my_price (int or float) like 100.5, my_tax_rate (rate in decimal number) like 0.12
-    Example: my_price (100.5), my_tax_rate (0.12)
+    Calculates taxes owed by multiplying price times the appropriate tax rate
+    
+    Param: my_price (int or float) like 100.5, my_tax_rate (float) is the tax rate in decimal format like 0.12
+    
+    Example: calculate_taxes_owed(100.5, 0.12)
+    
     Returns: 12.06
     """
     return my_price * my_tax_rate
 
 def calculate_total_price (my_subtotal, my_taxes):
     """
-    Calculate total price by adding subtotal plus taxes
+    Calculates total price by adding subtotal plus taxes
+    
     Param: my_subtotal (int or float) like 23.5, my_taxes (int or float) like 1.75
-    Example: my_subtotal (23.5), my_taxes (1.75)
+    
+    Example: calculate_total_price(23.5, 1.75)
+    
     Returns: 25.25
     """
     return my_subtotal + my_taxes
-
 
 if __name__ == "__main__":
 
@@ -139,10 +143,6 @@ if __name__ == "__main__":
     for pound_id in list(filter(id_pound,products)):
         id_pound_list.append(str(pound_id["id"]))
 
-    #for item in id_list:
-    #    if item["price_per"] == "pound"
-    #        id_pound_list.append(str(item["id"])) 
-
     # Use WHILE LOOP to allow cashier to enter product identifiers:
 
     selected_items = []
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
     # Print time of purchase:
     purchase_time = datetime.datetime.now()
-    receipt_message = receipt_message + "Checkout at: " + time_format(purchase_time)
+    receipt_message = receipt_message + "Checkout at: " + purchase_time.strftime("%Y-%m-%d %I:%M %p")
     receipt_message = receipt_message + "\n"
     receipt_message = receipt_message + "--------------------------------------------------"
     receipt_message = receipt_message + "\n"
@@ -195,16 +195,12 @@ if __name__ == "__main__":
     total_price = 0
     for cashier_input in selected_items:
         matching_product = find_product(cashier_input, products)
-        #matching_products = [p for p in products if str(p["id"]) == str(cashier_input)]
-        #matching_product = matching_products[0]
         total_price = total_price + matching_product["price"]
         receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(to_usd(matching_product["price"])) + ")"
         receipt_message = receipt_message + "\n"
 
     for d in selected_pounds:
         matching_product = find_product(d["id"], products)
-        #matching_products = [p for p in products if str(p["id"]) == str(d["id"])]
-        #matching_product = matching_products[0]
         total_pounds = matching_product["price"]*(float(d["pounds"]))
         total_price = total_price + total_pounds
         receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(to_usd(total_pounds)) + ")"
@@ -219,12 +215,12 @@ if __name__ == "__main__":
 
     # Print taxes using pre-configured sales tax rate (environment variable):
     tax_rate_input = float(os.environ.get("TAX_RATE"))
-    tax = calculate_taxes_owed (total_price,tax_rate_input)
+    tax = calculate_taxes_owed(total_price,tax_rate_input)
     receipt_message = receipt_message + "Tax: " + str(to_usd(tax))
     receipt_message = receipt_message + "\n"
 
     # Print total purchase price:
-    total_amount = calculate_total_price (total_price,tax)
+    total_amount = calculate_total_price(total_price,tax)
     receipt_message = receipt_message + "Total: " + str(to_usd(total_amount))
     receipt_message = receipt_message + "\n"
 
@@ -239,14 +235,14 @@ if __name__ == "__main__":
 
     print(receipt_message)
 
-
     # FURTHER CHALLENGE: writing receipts to txt file
     # Code source for this challenge: Online notes on python file management:
     # https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/file-management.md
     # Also discussed with Ahmad Wilson on creating a variable to store the receipt message
 
-    file_name = os.path.join(os.path.dirname(__file__), "..", "receipts", f"{time_format(purchase_time)}.txt")
-    with open(file_name, "w") as file:
+    file_name = purchase_time.strftime("%Y-%m-%d-%H-%M-%S-%f") + ".txt"
+    file_path = os.path.join(os.path.dirname(__file__), "..", "receipts", file_name)
+    with open(file_path, "w") as file:
         file.write(receipt_message)
 
 

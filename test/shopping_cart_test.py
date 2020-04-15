@@ -2,7 +2,7 @@
 
 import pytest # for pytest.raises (see: https://docs.pytest.org/en/latest/assert.html)
 
-from app.shopping_cart import to_usd, time_format, find_product, calculate_taxes_owed, calculate_total_price
+from app.shopping_cart import to_usd, find_product, calculate_taxes_owed, calculate_total_price
 
 def test_to_usd():
     result = to_usd(1500)
@@ -14,9 +14,8 @@ def test_to_usd():
     result = to_usd(2.5)
     assert result == "$2.50"
 
-#def test_time_format():
-#    result = time_format(2012-1-1 21:21:21)
-#    assert result == "2020-10-10 02:31 PM"
+# Python code for test_find_product was written using some code taken from prof-rossetti repository
+# https://github.com/s2t2/shopping-cart-screencast/blob/testing/shopping_cart_test.py
 
 def test_find_product():
     products = [
@@ -25,11 +24,10 @@ def test_find_product():
         {"id":2, "name": "All-Seasons Salt", "department": "pantry", "aisle": "spices seasonings", "price": 4.99, "price_per": "item"},
         {"id":4, "name": "Smart Ones Classic Favorites Mini Rigatoni With Vodka Cream Sauce", "department": "frozen", "aisle": "frozen meals", "price": 6.99, "price_per": "item"},
     ]
-    # if there is a match, it should find and return a product
+
     matching_product = find_product("4", products)
     assert matching_product["department"] == "frozen"
 
-    # if there is no match, it should raise an IndexError
     with pytest.raises(IndexError):
         find_product("5968", products)
 
