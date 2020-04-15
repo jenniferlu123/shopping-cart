@@ -25,8 +25,11 @@ def test_find_product():
         {"id":4, "name": "Smart Ones Classic Favorites Mini Rigatoni With Vodka Cream Sauce", "department": "frozen", "aisle": "frozen meals", "price": 6.99, "price_per": "item"},
     ]
 
+    matching_product = find_product("2", products)
+    assert matching_product["department"] == "pantry"
+
     matching_product = find_product("4", products)
-    assert matching_product["department"] == "frozen"
+    assert matching_product["name"] == "Smart Ones Classic Favorites Mini Rigatoni With Vodka Cream Sauce"
 
     with pytest.raises(IndexError):
         find_product("5968", products)
