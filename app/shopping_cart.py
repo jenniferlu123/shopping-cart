@@ -1,4 +1,4 @@
-# shopping_cart.py
+# shopping-cart/app/shopping_cart.py
 
 import datetime
 from dotenv import load_dotenv
@@ -9,6 +9,18 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pprint
 import sendgrid
 from sendgrid.helpers.mail import * 
+
+
+load_dotenv()
+
+# Google Sheets Database Integration
+DOCUMENT_ID = os.environ.get("GOOGLE_SHEET_ID", "OOPS")
+SHEET_NAME = os.environ.get("SHEET_NAME", "products")
+
+# Sendgrid Integration
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "OOPS")
+MY_EMAIL_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS", "OOPS")
+
 
 def to_usd(my_price):
     """
@@ -30,7 +42,7 @@ def find_product(product_id, all_products):
     
     Source: https://github.com/s2t2/shopping-cart-screencast/blob/testing/shopping_cart.py
     
-    Param: product_id is the name of the variable that stores any string/integer referring to the product ID, all_products is a list like products
+    Param: product_id is the name of the variable that stores the product ID entered (string), all_products is a list like products
     
     Example: find_product(cashier_input, products)
     
@@ -43,7 +55,7 @@ def find_product(product_id, all_products):
 
 def id_pound(item):
     """
-    Filters the items that are priced by "pound", to be used as the filtering condition later in a list filter
+    Filters the items that are priced by "pound", to be used as filtering condition later in a list filter
     
     Source: https://github.com/prof-rossetti/intro-to-python/blob/7adaa47921be090406fd43e2e67cbd7c72092bde/notes/python/datatypes/lists.md
     
@@ -74,6 +86,7 @@ def calculate_total_price (my_subtotal, my_taxes):
     Returns: 25.25
     """
     return my_subtotal + my_taxes
+
 
 if __name__ == "__main__":
 
@@ -107,11 +120,6 @@ if __name__ == "__main__":
     # https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/packages/gspread.md
     # Also discussed with Ahmad Wilson on set-up instructions
 
-    load_dotenv()
-
-    DOCUMENT_ID = os.environ.get("GOOGLE_SHEET_ID", "OOPS")
-    SHEET_NAME = os.environ.get("SHEET_NAME", "products")
-
     # AUTHORIZATION
 
     CREDENTIALS_FILEPATH = os.path.join(os.path.dirname(__file__),"..", "auth", "spreadsheet_credentials.json")
@@ -130,8 +138,8 @@ if __name__ == "__main__":
     sheet = doc.worksheet(SHEET_NAME) 
 
     rows = sheet.get_all_records() 
-
     products = [r for r in rows]
+
 
     # Create lists to store cashier inputs:
 
@@ -165,8 +173,6 @@ if __name__ == "__main__":
             selected_items.append(cashier_input)
 
 
-    # Variable "receipt_message" is created to store the entire message to be shown on the receipt 
-
     # Print grocery store information:
     receipt_message = "--------------------------------------------------"
     receipt_message = receipt_message + "\n"
@@ -196,32 +202,32 @@ if __name__ == "__main__":
     for cashier_input in selected_items:
         matching_product = find_product(cashier_input, products)
         total_price = total_price + matching_product["price"]
-        receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(to_usd(matching_product["price"])) + ")"
+        receipt_message = receipt_message + "... " + matching_product["name"] + " (" + to_usd(matching_product["price"]) + ")"
         receipt_message = receipt_message + "\n"
 
     for d in selected_pounds:
         matching_product = find_product(d["id"], products)
         total_pounds = matching_product["price"]*(float(d["pounds"]))
         total_price = total_price + total_pounds
-        receipt_message = receipt_message + "... " + matching_product["name"] + " (" + str(to_usd(total_pounds)) + ")"
+        receipt_message = receipt_message + "... " + matching_product["name"] + " (" + to_usd(total_pounds) + ")"
         receipt_message = receipt_message + "\n"
 
     receipt_message = receipt_message + "--------------------------------------------------"
     receipt_message = receipt_message + "\n"
 
     # Print subtotal:
-    receipt_message = receipt_message + "Subtotal: " + str(to_usd(total_price))
+    receipt_message = receipt_message + "Subtotal: " + to_usd(total_price)
     receipt_message = receipt_message + "\n"
 
     # Print taxes using pre-configured sales tax rate (environment variable):
     tax_rate_input = float(os.environ.get("TAX_RATE"))
     tax = calculate_taxes_owed(total_price,tax_rate_input)
-    receipt_message = receipt_message + "Tax: " + str(to_usd(tax))
+    receipt_message = receipt_message + "Tax: " + to_usd(tax)
     receipt_message = receipt_message + "\n"
 
     # Print total purchase price:
     total_amount = calculate_total_price(total_price,tax)
-    receipt_message = receipt_message + "Total: " + str(to_usd(total_amount))
+    receipt_message = receipt_message + "Total: " + to_usd(total_amount)
     receipt_message = receipt_message + "\n"
 
     # Print thank you message:
@@ -234,6 +240,7 @@ if __name__ == "__main__":
     receipt_message = receipt_message + "--------------------------------------------------"
 
     print(receipt_message)
+
 
     # FURTHER CHALLENGE: writing receipts to txt file
     # Code source for this challenge: Online notes on python file management:
@@ -253,10 +260,6 @@ if __name__ == "__main__":
     if customer_email_address == "NO":
         pass
     else:
-        #load_dotenv()
-
-        SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "OOPS")
-        MY_EMAIL_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS", "OOPS")
 
         # AUTHENTICATE
 
