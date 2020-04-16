@@ -13,11 +13,11 @@ from sendgrid.helpers.mail import *
 
 load_dotenv()
 
-# Google Sheets Database Integration
+# Google Sheets API Key
 DOCUMENT_ID = os.environ.get("GOOGLE_SHEET_ID", "OOPS")
 SHEET_NAME = os.environ.get("SHEET_NAME", "products")
 
-# Sendgrid Integration
+# Sendgrid API Key
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "OOPS")
 MY_EMAIL_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS", "OOPS")
 
